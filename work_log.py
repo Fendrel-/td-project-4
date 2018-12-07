@@ -1,2 +1,5 @@
+from Entry import db, Entry
+
 if __name__ == "__main__":
-    pass
+    db.connect()
+    db.create_tables([Entry])
