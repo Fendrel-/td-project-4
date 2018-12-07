@@ -14,3 +14,12 @@ class Entry(BaseModel):
     task_name = CharField()
     time_spent = IntegerField()
     notes = TextField()
+
+    def New():
+        pass
+
+    def Delete():
+        pass
+
+    def Edit():
+        pass
