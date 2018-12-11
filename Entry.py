@@ -10,7 +10,7 @@ class BaseModel(Model):
 
 
 class Entry(BaseModel):
-    date = DateTimeField()
+    date = DateField()
     employee_name = CharField()
     task_name = CharField()
     time_spent = IntegerField()
@@ -27,12 +27,3 @@ class Entry(BaseModel):
                      task_name=task_name,
                      time_spent=time_spent,
                      notes=notes)
-
-    def Display():
-        pass
-
-    def Delete():
-        pass
-
-    def Edit():
-        pass
