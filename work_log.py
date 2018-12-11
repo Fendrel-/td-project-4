@@ -28,10 +28,9 @@ def add_entry():
 
 
 def display_entry(query_results, index=0):
+    status_message = None
     while True:
         current_entry = query_results[index]
-        status_message = "\n Displaying entry {} of {}".format(
-            index+1, len(query_results))
         menu.Header('Display Entry')
         print('\n Date:      {}'.format(
             current_entry.date.strftime(format='%m/%d/%Y')))
@@ -39,9 +38,11 @@ def display_entry(query_results, index=0):
         print(' Task:      {}'.format(current_entry.task_name))
         print(' Minutes:   {}'.format(current_entry.time_spent))
         print(' Notes:     {}'.format(current_entry.notes))
-        print()
-        print('-' * 35)
+        print('\n\n Displaying entry {} of {}'.format(
+            index+1, len(query_results)))
+        print('\n' + '-' * 35)
         menu.StatusMessage(status_message)
+        status_message = None
         menu_options = ['Previous', 'Next',
                         'Edit', 'Delete']
         menu.Options(menu_options)
@@ -60,38 +61,89 @@ def display_entry(query_results, index=0):
 
         elif user_choice == "4":
             if "Y" in input(' Are you sure you want to delete?: ').upper():
-                current_entry.delete()
+                current_entry.delete_instance()
                 if index > len(query_results) - 1:
                     index = index - 1
                 current_entry = query_results[index]
-            continue
+            break
 
         elif user_choice == "5":
             break
         elif user_choice == "6":
             kill_script()
+        else:
+            status_message = " Sorry I don't understand that!"
 
 
 def search_by_date():
     status_message = None
-    menu_options = search.ByDate().datestring
     while True:
+        menu_options = search.ByDate().datestring
         menu.Header('Search By Date')
         menu.StatusMessage(status_message)
         status_message = None
-        menu.Options(menu_options)
+        try:
+            menu.Options(menu_options, date_range=True)
+        except UnboundLocalError:
+            return " It doesn't look like you have any entries yet!"
         user_choice = user_prompt()
-        if int(user_choice) == len(menu_options) + 1:
+        if int(user_choice) == len(menu_options) + 2:
             break
-        elif int(user_choice) == len(menu_options) + 2:
+        elif int(user_choice) == len(menu_options) + 3:
             kill_script()
         else:
             display_entry(Entry.select().where(Entry.date == datetime.strptime(
                 menu_options[int(user_choice)-1], '%m/%d/%Y')))
 
 
-def search_entry():
+def search_by_employee():
+    status_message = None
+    while True:
+        menu_options = search.ByEmployee().names
+        menu.Header('Search By Employee')
+        menu.StatusMessage(status_message)
+        status_message = None
+        try:
+            menu.Options(menu_options, employee_name=True)
+        except UnboundLocalError:
+            return " It doesn't look like you have any entries yet!"
+        user_choice = user_prompt()
+        if int(user_choice) == len(menu_options) + 2:
+            break
+        elif int(user_choice) == len(menu_options) + 3:
+            kill_script()
+        else:
+            display_entry(Entry.select().where(
+                Entry.employee_name == menu_options[int(user_choice)-1]))
 
+
+def search_by_time_spent():
+    status_message = None
+    while True:
+        menu.Header('Search By Employee')
+        menu.StatusMessage(status_message)
+        status_message = None
+        user_choice = input('\n Enter a time spent in minutes: ')
+        display_entry(Entry.select().where(
+            Entry.time_spent == int(user_choice)))
+        break
+
+
+def search_by_term():
+    status_message = None
+    while True:
+        menu.Header('Search By Term')
+        menu.StatusMessage(status_message)
+        status_message = None
+        user_choice = input('\n Enter a term to search for: ')
+        display_entry(Entry.select().where(
+            (Entry.employee_name.contains(user_choice)) |
+            (Entry.task_name.contains(user_choice)) |
+            (Entry.notes.contains(user_choice))))
+        break
+
+
+def search_entry():
     menu_options = ['Search By Date', 'Search By Employee',
                     'Search By Time Spent', 'Search By Term']
     status_message = None
@@ -102,9 +154,18 @@ def search_entry():
         menu.Options(menu_options)
         user_choice = user_prompt()
         if user_choice == "1":
-            search_by_date()
+            status_message = search_by_date()
             continue
-        if user_choice == "5":
+        elif user_choice == "2":
+            status_message = search_by_employee()
+            continue
+        elif user_choice == "3":
+            status_message = search_by_time_spent()
+            continue
+        elif user_choice == "4":
+            status_message = search_by_term()
+            continue
+        elif user_choice == "5":
             break
         elif user_choice == "6":
             kill_script()

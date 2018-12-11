@@ -2,7 +2,12 @@ from entry import Entry
 
 
 class ByEmployee():
-    pass
+    def __init__(self):
+        names = []
+        for count, entry in enumerate(Entry.select()):
+            if entry.employee_name not in names:
+                names.append(entry.employee_name)
+        self.names = names
 
 
 class ByDate():
@@ -25,10 +30,6 @@ class ByDate():
 
     def Edit():
         pass
-
-
-class ByTimeSpent():
-    pass
 
 
 class ByTerm():
