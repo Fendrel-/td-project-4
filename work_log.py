@@ -27,6 +27,13 @@ def add_entry():
             return " Error: Entry could not be added."
 
 
+def print_menu(header, menu_options=None, status_message=None, is_main=False):
+    menu.Header(header)
+    menu.StatusMessage(status_message)
+    if menu_options:
+        menu.Options(menu_options, is_main)
+
+
 def display_entry(query_results, index=0):
     status_message = None
     while True:
@@ -52,13 +59,11 @@ def display_entry(query_results, index=0):
             if index < 0:
                 index = len(query_results) - 1
             continue
-
-        elif user_choice == "2":
+        elif user_choice == "2" or user_choice == "":
             index += 1
             if index > len(query_results) - 1:
                 index = 0
             continue
-
         elif user_choice == "4":
             if "Y" in input(' Are you sure you want to delete?: ').upper():
                 current_entry.delete_instance()
@@ -66,7 +71,6 @@ def display_entry(query_results, index=0):
                     index = index - 1
                 current_entry = query_results[index]
             break
-
         elif user_choice == "5":
             break
         elif user_choice == "6":
@@ -76,20 +80,15 @@ def display_entry(query_results, index=0):
 
 
 def search_by_date():
-    status_message = None
+    header = "Search By Date"
     while True:
         menu_options = search.ByDate().datestring
-        menu.Header('Search By Date')
-        menu.StatusMessage(status_message)
-        status_message = None
-        try:
-            menu.Options(menu_options, date_range=True)
-        except UnboundLocalError:
-            return " It doesn't look like you have any entries yet!"
+        print_menu(header, menu_options)
         user_choice = user_prompt()
-        if int(user_choice) == len(menu_options) + 2:
+        print(len(menu_options))
+        if int(user_choice) == len(menu_options) + 1:
             break
-        elif int(user_choice) == len(menu_options) + 3:
+        elif int(user_choice) == len(menu_options) + 2:
             kill_script()
         else:
             display_entry(Entry.select().where(Entry.date == datetime.strptime(
@@ -97,20 +96,14 @@ def search_by_date():
 
 
 def search_by_employee():
-    status_message = None
+    header = "Search By Employee"
     while True:
         menu_options = search.ByEmployee().names
-        menu.Header('Search By Employee')
-        menu.StatusMessage(status_message)
-        status_message = None
-        try:
-            menu.Options(menu_options, employee_name=True)
-        except UnboundLocalError:
-            return " It doesn't look like you have any entries yet!"
+        print_menu(header, menu_options)
         user_choice = user_prompt()
-        if int(user_choice) == len(menu_options) + 2:
+        if int(user_choice) == len(menu_options) + 1:
             break
-        elif int(user_choice) == len(menu_options) + 3:
+        elif int(user_choice) == len(menu_options) + 2:
             kill_script()
         else:
             display_entry(Entry.select().where(
@@ -118,23 +111,31 @@ def search_by_employee():
 
 
 def search_by_time_spent():
+    header = "Search By Employee"
     status_message = None
     while True:
-        menu.Header('Search By Employee')
-        menu.StatusMessage(status_message)
-        status_message = None
+        print_menu(header, status_message)
         user_choice = input('\n Enter a time spent in minutes: ')
-        display_entry(Entry.select().where(
-            Entry.time_spent == int(user_choice)))
+        try:
+            if int(user_choice) < 1:
+                status_message = " You must enter a positive integer!"
+                continue
+        except ValueError:
+            status_message = " Please enter a valid integer!"
+            continue
+        try:
+            display_entry(Entry.select().where(
+                Entry.time_spent == int(user_choice)))
+        except IndexError:
+            return " No matches found!"
         break
 
 
 def search_by_term():
+    header = "Search By Term"
     status_message = None
     while True:
-        menu.Header('Search By Term')
-        menu.StatusMessage(status_message)
-        status_message = None
+        print_menu(header, status_message)
         user_choice = input('\n Enter a term to search for: ')
         display_entry(Entry.select().where(
             (Entry.employee_name.contains(user_choice)) |
@@ -144,14 +145,12 @@ def search_by_term():
 
 
 def search_entry():
+    header = "Search Entries"
     menu_options = ['Search By Date', 'Search By Employee',
                     'Search By Time Spent', 'Search By Term']
     status_message = None
     while True:
-        menu.Header('Search Entries')
-        menu.StatusMessage(status_message)
-        status_message = None
-        menu.Options(menu_options)
+        print_menu(header, menu_options, status_message)
         user_choice = user_prompt()
         if user_choice == "1":
             status_message = search_by_date()
@@ -172,13 +171,11 @@ def search_entry():
 
 
 def main_menu():
+    header = "Main Menu"
     menu_options = ['Add Entry', 'Search Entries']
     status_message = None
     while True:
-        menu.Header('Main Menu')
-        menu.StatusMessage(status_message)
-        status_message = None
-        menu.Options(menu_options, is_Main=True)
+        print_menu(header, menu_options, status_message, is_main=True)
         user_choice = user_prompt()
         if user_choice is "1":
             status_message = add_entry()
