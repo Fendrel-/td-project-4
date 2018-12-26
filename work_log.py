@@ -99,9 +99,15 @@ def search_by_employee():
     header = "Search By Employee"
     while True:
         menu_options = search.ByEmployee().names
+        menu_options.append('Search By Name')
         print_menu(header, menu_options)
         user_choice = user_prompt()
-        if int(user_choice) == len(menu_options) + 1:
+        if int(user_choice) == len(menu_options):
+            menu.Header('Enter Employee Name')
+            search_entry = input('\n Enter an employee name to search for: ')
+            display_entry(Entry.select().where(
+                (Entry.employee_name.contains(search_entry))))
+        elif int(user_choice) == len(menu_options) + 1:
             break
         elif int(user_choice) == len(menu_options) + 2:
             kill_script()
@@ -168,6 +174,8 @@ def search_entry():
             break
         elif user_choice == "6":
             kill_script()
+        else:
+            status_message = " Sorry I don't understand that!"
 
 
 def main_menu():
